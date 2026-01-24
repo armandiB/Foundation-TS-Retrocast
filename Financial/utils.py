@@ -24,8 +24,12 @@ def make_cum_returns_list(list_vals, start_val=1):
     return res
 
 
-def find_closest_previous_date_series(series, date):
+def find_closest_previous_val(series, date):
     return series[series.index < date].iat[-1]
+
+
+def find_closest_next_or_equal_index(series, date):
+    return series[series.index >= date].index[0]
 
 
 def generate_fcd_idxs(fcds_list, index_list):

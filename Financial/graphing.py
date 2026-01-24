@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
-from utils import make_cum_returns_df, make_cum_returns_list, find_closest_previous_date_series
+from utils import make_cum_returns_df, make_cum_returns_list, find_closest_previous_val
 
 
 def plot_quantiles(index_list, prediction_cum_list, forecasted_series, quantile_bands=((0.1, 0.9), ), ylabel='Return', title='Prediction'):
@@ -43,7 +43,7 @@ def plot_quantiles_returns(index_list, prediction_list, forecasted_data, col_nam
     prediction_cum_list = []
     for index, prediction_dict in zip(index_list, prediction_list):
         # TODO: might want to reset start point to median each day for other quantiles?
-        prediction_cum_list += [{key: make_cum_returns_list(list_vals, start_val=find_closest_previous_date_series(forecasted_data_cum[col_name], index[0])) for key, list_vals in prediction_dict.items()}]
+        prediction_cum_list += [{key: make_cum_returns_list(list_vals, start_val=find_closest_previous_val(forecasted_data_cum[col_name], index[0])) for key, list_vals in prediction_dict.items()}]
     plot_quantiles(index_list, prediction_cum_list, forecasted_data_cum, quantile_bands=quantile_bands, ylabel=col_name, title=title)
 
 

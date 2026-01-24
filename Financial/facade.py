@@ -4,7 +4,7 @@ from data import import_csv_data, df_to_series_dict
 from api import request_forecast, process_response, collect_results
 from graphing import plot_quantiles_returns, plot_backtests
 from utils import generate_fcd_idxs
-from backtest import build_backtest_df
+from pnl_backtest import build_backtest_df
 
 def generate_monthly_fcds(prepared_data_index):
     fcds_list = sorted([dt.date(year, month, 1).strftime("%Y-%m-%d") for year in range(2017, 2025) for month in range(1, 13)])
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     col_name = 'Return'
     batch_request = True
     wait_for_results = True
-    known_job_id = None
+    known_job_id = "fc-01KFPX19EGSEEDPXAESKGQNQTY"
 
     snp_data = import_csv_data(snp_data_file, date_format="%m/%d/%y", col_name=col_name)
     prepared_data_dict = df_to_series_dict(snp_data, col_name=col_name)
@@ -34,7 +34,8 @@ if __name__ == "__main__":
         "quantiles": [0.1, 0.9, 0.3, 0.7, 0.5],
     }
 
-    payload["series"][0]["fcds"] = generate_daily_fcds(prepared_data_dict['index'], start_idx=252*9)
+    payload["series"][0]["fcds"] = generate_daily_fcds(prepared_data_dict['index'], start_idx=252*8)
+    print(payload["series"][0]["fcds"])
 
     if known_job_id is None or not batch_request:
         forecast_response = request_forecast(payload, model=model, batch=batch_request)
@@ -50,8 +51,8 @@ if __name__ == "__main__":
     print(response_json)
     index_list, prediction_list, metrics_list = process_response(response_json)
 
-    backtest_df = build_backtest_df(index_list, prediction_list, snp_data, quantile_for_prediction=0.5)
-    plot_backtests(backtest_df, ['Strat_Bin_CumPnl'], title='Backtest')
+    backtest_df = build_backtest_df(index_list, prediction_list, snp_data[col_name], quantile_for_prediction=0.5)
+    plot_backtests(backtest_df, ['Strat_Long_CumPnl', 'Strat_Bin_CumPnl', 'Strat_Lin_CumPnl'], title='Backtest')
 
     print(metrics_list)
     plot_quantiles_returns(index_list, prediction_list, snp_data, col_name, quantile_bands=((0.1, 0.9),), title='Prediction')
