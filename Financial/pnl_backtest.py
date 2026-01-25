@@ -17,17 +17,23 @@ def build_backtest_df(index_list, prediction_list, forecasted_returns, quantile_
     backtest_df = pd.DataFrame(values_df, index=index_df, columns=['Pred_Value', 'Fwd_Ret'])
 
     backtest_df['Pos_Bin'] = np.sign(backtest_df['Pred_Value'])
+    backtest_df['Pos_BinCentered'] = np.sign(backtest_df['Pred_Value'] - backtest_df['Pred_Value'].ewm(halflife=30).mean())
     backtest_df['Pos_Lin'] = backtest_df['Pred_Value']
+    backtest_df['Pos_LinCentered'] = backtest_df['Pred_Value'] - backtest_df['Pred_Value'].ewm(halflife=30).mean()
 
     ## Final pnls for strategies
-    # TODO: temporary
-
-    backtest_df['Strat_Long_CumPnl'] = backtest_df['Fwd_Ret'].cumsum() / backtest_df['Fwd_Ret'].std()
-
-    backtest_df['Strat_Bin_Ret'] = backtest_df['Pos_Bin']*backtest_df['Fwd_Ret']
-    backtest_df['Strat_Bin_CumPnl'] = backtest_df['Strat_Bin_Ret'].cumsum() / backtest_df['Strat_Bin_Ret'].std()
-
-    backtest_df['Strat_Lin_Ret'] = backtest_df['Pos_Lin']*backtest_df['Fwd_Ret']
-    backtest_df['Strat_Lin_CumPnl'] = backtest_df['Strat_Lin_Ret'].cumsum() / backtest_df['Strat_Lin_Ret'].std()
+    backtest_df['Strat_Long_NormCumPnl'] = make_norm_cum_pnl(backtest_df['Fwd_Ret'])
+    for strategy_name in ['Bin', 'BinCentered', 'Lin', 'LinCentered']:
+        add_backtest_for_strategy(backtest_df, strategy_name, fwd_return_col_name='Fwd_Ret')
 
     return backtest_df
+
+
+def make_norm_cum_pnl(daily_pnl_series):
+    return daily_pnl_series.cumsum() / daily_pnl_series.std()
+
+
+def add_backtest_for_strategy(df, strategy_name, fwd_return_col_name='Fwd_Ret'):
+    strategy_return_col_name = 'Strat_'+strategy_name+'_Ret'
+    df[strategy_return_col_name] = df['Pos_'+strategy_name] * df[fwd_return_col_name]
+    df['Strat_'+strategy_name+'_NormCumPnl'] = make_norm_cum_pnl(df[strategy_return_col_name])

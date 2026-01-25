@@ -6,12 +6,13 @@ from graphing import plot_quantiles_returns, plot_backtests
 from utils import generate_fcd_idxs
 from pnl_backtest import build_backtest_df
 
+
 def generate_monthly_fcds(prepared_data_index):
     fcds_list = sorted([dt.date(year, month, 1).strftime("%Y-%m-%d") for year in range(2017, 2025) for month in range(1, 13)])
     return generate_fcd_idxs(fcds_list, prepared_data_index)
 
 
-def generate_daily_fcds(prepared_data_index, start_idx=30):
+def generate_daily_fcds(prepared_data_index, start_idx=30):  # TODO: length, max_index
     return list(range(start_idx, len(prepared_data_index)))
 
 
@@ -52,7 +53,7 @@ if __name__ == "__main__":
     index_list, prediction_list, metrics_list = process_response(response_json)
 
     backtest_df = build_backtest_df(index_list, prediction_list, snp_data[col_name], quantile_for_prediction=0.5)
-    plot_backtests(backtest_df, ['Strat_Long_CumPnl', 'Strat_Bin_CumPnl', 'Strat_Lin_CumPnl'], title='Backtest')
+    plot_backtests(backtest_df, ['Strat_Long_NormCumPnl', 'Strat_Bin_NormCumPnl', 'Strat_BinCentered_NormCumPnl', 'Strat_Lin_NormCumPnl', 'Strat_LinCentered_NormCumPnl'], title='Backtest')
 
     print(metrics_list)
     plot_quantiles_returns(index_list, prediction_list, snp_data, col_name, quantile_bands=((0.1, 0.9),), title='Prediction')
