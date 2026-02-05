@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from utils import is_float
 
 RETROCAST_URL = "https://api.retrocast.com"
-API_KEY = "zpka_e781321f87c6403791df678ccbfc84ab_446a17e0"
+API_KEY = ""
 
 
 def request_forecast(payload, model='tabpfn-ts', batch=True):
